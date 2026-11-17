@@ -39,3 +39,26 @@ function stringLength(string $value): int {
     $length = preg_match_all('/./us', $value, $matches);
     return $length === false ? PHP_INT_MAX : $length;
 }
+/**
+ * Returns the CSS badge class for a given operational status.
+ */
+function getStatusBadgeClass(string $status): string {
+    return match ($status) {
+        'ONLINE'  => 'badge-green',
+        'SLOW'    => 'badge-yellow',
+        'OFFLINE' => 'badge-red',
+        default   => 'badge-grey',
+    };
+}
+
+/**
+ * Returns the emoji status indicator dot for a given operational status.
+ */
+function getStatusDot(string $status): string {
+    return match ($status) {
+        'ONLINE'  => '🟢',
+        'SLOW'    => '🟡',
+        'OFFLINE' => '🔴',
+        default   => '⚪',
+    };
+}
