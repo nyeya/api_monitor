@@ -11,7 +11,18 @@ try {
     $pdo = getDbConnection();
 
     // Fetch enabled services
-    $sql = "SELECT * FROM services WHERE enabled = TRUE ORDER BY id ASC";
+    $sql = "
+        SELECT s.*
+        FROM services s
+        LEFT JOIN (
+            SELECT service_id, MAX(checked_at) AS last_checked
+            FROM monitoring_history
+            GROUP BY service_id
+        ) h ON s.id = h.service_id
+        WHERE s.enabled = TRUE
+          AND (h.last_checked IS NULL OR h.last_checked <= NOW() - (s.check_interval_seconds || ' seconds')::INTERVAL)
+        ORDER BY s.id ASC
+    ";
     $services = $pdo->query($sql)->fetchAll();
 
     if (empty($services)) {
