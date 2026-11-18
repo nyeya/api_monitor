@@ -94,6 +94,7 @@ require_once __DIR__ . '/../config/db.php';
             </section>
         </main>
     </div>
+    <script src="/js/dashboard.js"></script>
 </body>
 
 </html>
