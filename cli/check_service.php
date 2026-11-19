@@ -7,10 +7,18 @@
 
 require_once __DIR__ . '/../config/db.php';
 
+// Prevent overlapping cron executions using cross-platform file locking
+$lockFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'api_monitor.lock';
+$lockFile = fopen($lockFilePath, 'c');
+if (!$lockFile || !flock($lockFile, LOCK_EX | LOCK_NB)) {
+    echo "[" . date('Y-m-d H:i:s') . "] Another check process is currently active. Exiting.\n";
+    exit(0);
+}
+
 try {
     $pdo = getDbConnection();
 
-    // Fetch enabled services
+    // Fetch enabled services due for checking based on latest check in monitoring_history
     $sql = "
         SELECT s.*
         FROM services s
@@ -26,21 +34,27 @@ try {
     $services = $pdo->query($sql)->fetchAll();
 
     if (empty($services)) {
-        echo "[" . date('Y-m-d H:i:s') . "] No enabled services found.\n";
+        echo "[" . date('Y-m-d H:i:s') . "] No services due for check.\n";
     } else {
         echo "[" . date('Y-m-d H:i:s') . "] Checking " . count($services) . " service(s)...\n";
         foreach ($services as $service) {
             checkService($pdo, $service);
         }
-        echo "[" . date('Y-m-d H:i:s') . "] All checks completed.\n";
+        echo "[" . date('Y-m-d H:i:s') . "] All due checks completed.\n";
     }
 } catch (Exception $e) {
     echo "[" . date('Y-m-d H:i:s') . "] Error during monitoring run: " . $e->getMessage() . "\n";
+} finally {
+    if (is_resource($lockFile)) {
+        flock($lockFile, LOCK_UN);
+        fclose($lockFile);
+    }
 }
 
 function checkService(PDO $pdo, array $service): void {
     $ch = curl_init();
 
+    // Security & configuration options
     curl_setopt_array($ch, [
         CURLOPT_URL            => $service['url'],
         CURLOPT_RETURNTRANSFER => true,
