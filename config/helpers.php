@@ -62,3 +62,25 @@ function getStatusDot(string $status): string {
         default   => '⚪',
     };
 }
+/**
+ * Validates URLs and prevents Server-Side Request Forgery (SSRF).
+ * Blocks private IP ranges, loopback, and metadata endpoints.
+ */
+function isSafeUrl(string $url): bool {
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+
+    $parsed = parse_url($url);
+    if (!is_array($parsed) || !in_array(strtolower($parsed['scheme'] ?? ''), ['http', 'https'], true)) {
+        return false;
+    }
+
+    $host = strtolower($parsed['host'] ?? '');
+    $ip = gethostbyname($host);
+    return filter_var(
+        $ip,
+        FILTER_VALIDATE_IP,
+        FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    ) !== false;
+}

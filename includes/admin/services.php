@@ -65,7 +65,7 @@ try {
                 if (stringLength($formValues['description']) > 2000) {
                     $errors[] = 'Description must be 2000 characters or fewer.';
                 }
-                if (!filter_var($formValues['url'], FILTER_VALIDATE_URL)) {
+                if (!isSafeUrl($formValues['url'])) {
                     $errors[] = 'Enter a valid public HTTP or HTTPS URL (Private networks and internal addresses are blocked).';
                 }
                 if (!in_array($formValues['http_method'], ['GET', 'HEAD'], true)) {

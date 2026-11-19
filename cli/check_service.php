@@ -47,6 +47,8 @@ function checkService(PDO $pdo, array $service): void {
         CURLOPT_NOBODY         => ($service['http_method'] === 'HEAD'),
         CURLOPT_TIMEOUT        => (int)$service['timeout_seconds'],
         CURLOPT_CONNECTTIMEOUT => (int)$service['timeout_seconds'],
+        CURLOPT_FOLLOWLOCATION => false, // Prevent SSRF / open redirect following
+        CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         CURLOPT_USERAGENT      => 'ApiMonitor/1.0 (+https://example.com/bot; PHP/8)',
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_SSL_VERIFYHOST => false,
