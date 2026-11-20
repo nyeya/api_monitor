@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/db.php';
 try {
     $pdo = getDbConnection();
 
-    // Query configuration from services and latest operational telemetry from monitoring_history
+    // Query configuration from services, latest operational telemetry, and availability statistics (24h & 7d)
     $sql = "
         SELECT 
             s.id,
@@ -16,19 +16,38 @@ try {
             s.warning_threshold_ms,
             CASE 
                 WHEN s.enabled = FALSE THEN 'DISABLED'
-                ELSE COALESCE(h.status, 'UNKNOWN')
+                ELSE COALESCE(latest.status, 'UNKNOWN')
             END AS current_status,
-            h.http_code,
-            h.response_time_ms,
-            h.checked_at,
-            h.error_message
+            latest.http_code,
+            latest.response_time_ms,
+            latest.checked_at,
+            latest.error_message,
+            stats.uptime_24h,
+            stats.uptime_7d
         FROM services s
         LEFT JOIN (
             SELECT DISTINCT ON (service_id) 
                 service_id, status, http_code, response_time_ms, checked_at, error_message
             FROM monitoring_history
             ORDER BY service_id, checked_at DESC, id DESC
-        ) h ON s.id = h.service_id
+        ) latest ON s.id = latest.service_id
+        LEFT JOIN (
+            SELECT 
+                service_id,
+                ROUND(
+                    COUNT(CASE WHEN checked_at >= NOW() - INTERVAL '24 hours' AND status != 'OFFLINE' THEN 1 END)::DECIMAL
+                    / NULLIF(COUNT(CASE WHEN checked_at >= NOW() - INTERVAL '24 hours' THEN 1 END), 0) * 100,
+                    1
+                ) AS uptime_24h,
+                ROUND(
+                    COUNT(CASE WHEN checked_at >= NOW() - INTERVAL '7 days' AND status != 'OFFLINE' THEN 1 END)::DECIMAL
+                    / NULLIF(COUNT(CASE WHEN checked_at >= NOW() - INTERVAL '7 days' THEN 1 END), 0) * 100,
+                    1
+                ) AS uptime_7d
+            FROM monitoring_history
+            WHERE checked_at >= NOW() - INTERVAL '7 days'
+            GROUP BY service_id
+        ) stats ON s.id = stats.service_id
         ORDER BY s.id ASC
     ";
 
