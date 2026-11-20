@@ -39,6 +39,37 @@ function stringLength(string $value): int {
     $length = preg_match_all('/./us', $value, $matches);
     return $length === false ? PHP_INT_MAX : $length;
 }
+
+/**
+ * Validates URLs and prevents Server-Side Request Forgery (SSRF).
+ * Blocks private IP ranges, loopback, and metadata endpoints.
+ * Allows local mock_api.php for predictable testing.
+ */
+function isSafeUrl(string $url): bool {
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+
+    $parsed = parse_url($url);
+    if (!is_array($parsed) || !in_array(strtolower($parsed['scheme'] ?? ''), ['http', 'https'], true)) {
+        return false;
+    }
+
+    $host = strtolower($parsed['host'] ?? '');
+
+    // Allow local mock testing API specifically
+    if ($host === 'localhost' || $host === '127.0.0.1') {
+        return str_starts_with($parsed['path'] ?? '', '/mock_api.php');
+    }
+
+    $ip = gethostbyname($host);
+    return filter_var(
+        $ip,
+        FILTER_VALIDATE_IP,
+        FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    ) !== false;
+}
+
 /**
  * Returns the CSS badge class for a given operational status.
  */
@@ -62,30 +93,11 @@ function getStatusDot(string $status): string {
         default   => '⚪',
     };
 }
+
 /**
- * Validates URLs and prevents Server-Side Request Forgery (SSRF).
- * Blocks private IP ranges, loopback, and metadata endpoints.
+ * Renders the reusable application sidebar component.
  */
-function isSafeUrl(string $url): bool {
-    if (!filter_var($url, FILTER_VALIDATE_URL)) {
-        return false;
-    }
-
-    $parsed = parse_url($url);
-    if (!is_array($parsed) || !in_array(strtolower($parsed['scheme'] ?? ''), ['http', 'https'], true)) {
-        return false;
-    }
-
-     = strtolower($parsed['host'] ?? '');
-
-    // Allow local mock testing API specifically
-    if ($host === 'localhost' || $host === '127.0.0.1') {
-        return str_starts_with($parsed['path'] ?? '', '/mock_api.php');
-    }
-    $ip = gethostbyname($host);
-    return filter_var(
-        $ip,
-        FILTER_VALIDATE_IP,
-        FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-    ) !== false;
+function renderSidebar(string $active = 'dashboard'): void {
+    $activeSidebar = $active;
+    require __DIR__ . '/../views/sidebar.php';
 }
