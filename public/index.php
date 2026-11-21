@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config/db.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Monitor - Operational Dashboard</title>
-    <link rel="stylesheet" href="/css/sstyle.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
@@ -70,13 +70,14 @@ require_once __DIR__ . '/../config/db.php';
                                     <th>Current Status</th>
                                     <th>HTTP Code</th>
                                     <th>Response Time</th>
+                                    <th>Availability</th>
                                     <th>Date &amp; Time Checked</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="services-tbody">
                                 <tr>
-                                    <td colspan="6" class="table-empty-cell">Loading monitored endpoints...</td>
+                                    <td colspan="7" class="table-empty-cell">Loading monitored endpoints...</td>
                                 </tr>
                             </tbody>
                         </table>
