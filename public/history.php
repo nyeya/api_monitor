@@ -81,7 +81,7 @@ $chartValues = array_map(static function ($point) {
     return (float)$point['response_time_ms'];
 }, $responsePoints);
 $chartLabels = array_map(static function ($point) {
-    return date('H:i:s', strtotime($point['checked_at']));
+    return date('Y-m-d H:i:s', strtotime($point['checked_at']));
 }, $responsePoints);
 
 $currentStatus = $history ? $history[count($history) - 1]['status'] : 'UNKNOWN';
@@ -94,7 +94,7 @@ $statusBadgeClass = getStatusBadgeClass($currentStatus);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $service ? escapeHtml($service['name']) . ' - ' : ''; ?>History - API Monitor</title>
-    <link rel="stylesheet" href="/css/sstyle.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="app-layout" id="app-layout">
