@@ -30,7 +30,7 @@ function renderDashboard(services) {
     tbody.innerHTML = '';
 
     if (!services || services.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="table-empty-cell">No services configured yet. Visit <a href="admin.php">Manage Services</a> to add one.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="table-empty-cell">No services configured yet. Visit <a href="admin.php">Manage Services</a> to add one.</td></tr>';
         updateSummaryCounts(0, 0, 0, 0);
         return;
     }
@@ -63,6 +63,12 @@ function renderDashboard(services) {
 
         const httpDisplay = s.http_code !== null ? s.http_code : '—';
         const latencyDisplay = s.response_time_ms !== null ? `${Math.round(s.response_time_ms)} ms` : '—';
+        const uptime24Display = (s.uptime_24h !== null && s.uptime_24h !== undefined)
+            ? `${parseFloat(s.uptime_24h).toFixed(1)}%`
+            : '—';
+        const uptime7dDisplay = (s.uptime_7d !== null && s.uptime_7d !== undefined)
+            ? `${parseFloat(s.uptime_7d).toFixed(1)}%`
+            : '—';
         const dateDisplay = s.checked_at ? new Date(s.checked_at).toLocaleString() : 'Never';
 
         tr.innerHTML = `
@@ -75,6 +81,12 @@ function renderDashboard(services) {
             </td>
             <td><code>${httpDisplay}</code></td>
             <td>${latencyDisplay}</td>
+            <td>
+                <div class="stat-uptime-inline">
+                    <div><span class="text-muted">24h:</span> <strong>${uptime24Display}</strong></div>
+                    <div><span class="text-muted">7d:</span> <strong>${uptime7dDisplay}</strong></div>
+                </div>
+            </td>
             <td>${dateDisplay}</td>
             <td>
                 <a class="btn btn-sm btn-secondary" href="history.php?id=${s.id}">View History</a>
