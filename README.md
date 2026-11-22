@@ -10,7 +10,8 @@ Built with **PHP 8**, **PostgreSQL**, **JavaScript (ES6+)**, **HTML5**, **CSS3**
 
 API Monitor simulates an IT operations observability dashboard:
 - **Real-Time Operational Dashboard (`/index.php`)**: Displays live health status for all configured endpoints with color-coded status badges, response times, HTTP status codes, 24-hour and 7-day availability percentages, and last-checked timestamps. Automatically refreshes every 30 seconds via asynchronous AJAX polling with a visual countdown timer.
-- **Service Administration (`/admin.php`)**: Protected administrative interface to register, edit, toggle, or delete monitored services with full CSRF protection, input validation, and SSRF prevention.
+- **Service Administration (`/admin.php`)**: Protected administrative interface to view, edit, toggle, or delete monitored services.
+- **Add Service (`/add-service.php`)**: Protected standalone page for registering new monitored services with full CSRF protection, input validation, and SSRF prevention.
 - **Detailed History & Analytics (`/history.php?id=X`)**: Visualizes historical performance with a dynamic **Chart.js** line chart, uptime percentages, average response times, and incident logs.
 - **Background Monitoring Engine (`cli/check_service.php`)**: CLI script executing cURL requests with timeouts, SSL options, custom User-Agents, JSON structure verification, rate-limit awareness, and cross-platform process concurrency locking (`flock`).
 - **Continuous Worker (`cli/worker.php`)**: Automated background poller for Windows and local environments that continuously checks due services every 10 seconds.
@@ -115,6 +116,7 @@ To run every minute via Linux cron:
 - **Manage Services (Admin)**: `http://localhost:8000/admin.php`
   - **Username**: `admin`
   - **Password**: `admin123`
+- **Add Service**: `http://localhost:8000/add-service.php`
 - **Local Mock API**: `http://localhost:8000/mock_api.php`
 
 ---
