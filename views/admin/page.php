@@ -10,7 +10,6 @@
     <div class="app-layout" id="app-layout">
         <?php $activeSidebar = 'admin'; require __DIR__ . '/../sidebar.php'; ?>
 
-        <!-- Main Content Area -->
         <div class="app-main">
             <main class="container">
                 <?php if ($pageError !== null): ?>
@@ -26,7 +25,7 @@
 
                 <?php if ($confirmDelete !== null): ?>
                     <?php require __DIR__ . '/confirm-delete.php'; ?>
-                <?php else: ?>
+                <?php elseif ($editingService): ?>
                     <?php require __DIR__ . '/service-form.php'; ?>
                 <?php endif; ?>
 

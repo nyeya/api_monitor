@@ -1,5 +1,12 @@
 <section class="card">
-    <h2>Configured Monitoring Services</h2>
+    <div class="card-header-row">
+        <div>
+            <h2>Configured Monitoring Services</h2>
+        </div>
+        <div class="card-header-actions">
+            <a href="/add-service.php" class="btn btn-primary btn-sm">+ Add Service</a>
+        </div>
+    </div>
     <div class="table-wrap">
         <table class="data-table">
             <thead>
