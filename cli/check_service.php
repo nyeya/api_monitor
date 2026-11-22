@@ -1,13 +1,6 @@
 <?php
-/**
- * API Monitor - Background Monitoring Engine
- * Performs scheduled HTTP checks using cURL, evaluates status,
- * and records results strictly in the monitoring_history table.
- */
-
 require_once __DIR__ . '/../config/db.php';
 
-// Prevent overlapping cron executions using cross-platform file locking
 $lockFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'api_monitor.lock';
 $lockFile = fopen($lockFilePath, 'c');
 if (!$lockFile || !flock($lockFile, LOCK_EX | LOCK_NB)) {
@@ -18,7 +11,6 @@ if (!$lockFile || !flock($lockFile, LOCK_EX | LOCK_NB)) {
 try {
     $pdo = getDbConnection();
 
-    // Fetch enabled services due for checking based on latest check in monitoring_history
     $sql = "
         SELECT s.*
         FROM services s
@@ -51,20 +43,16 @@ try {
     }
 }
 
-/**
- * Checks an individual service endpoint, evaluates health, and logs results in monitoring_history.
- */
 function checkService(PDO $pdo, array $service): void {
     $ch = curl_init();
 
-    // Security & configuration options
     curl_setopt_array($ch, [
         CURLOPT_URL            => $service['url'],
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_NOBODY         => ($service['http_method'] === 'HEAD'),
         CURLOPT_TIMEOUT        => (int)$service['timeout_seconds'],
         CURLOPT_CONNECTTIMEOUT => (int)$service['timeout_seconds'],
-        CURLOPT_FOLLOWLOCATION => false, // Prevent SSRF / open redirect following
+        CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         CURLOPT_USERAGENT      => 'ApiMonitor/1.0 (+https://example.com/bot; PHP/8)',
         CURLOPT_SSL_VERIFYPEER => false,
@@ -80,7 +68,6 @@ function checkService(PDO $pdo, array $service): void {
     $curlError = curl_error($ch);
     curl_close($ch);
 
-    // Evaluate check failure conditions
     $checkFailed = false;
     $errorMessage = null;
 
@@ -94,7 +81,6 @@ function checkService(PDO $pdo, array $service): void {
         $checkFailed = true;
         $errorMessage = "Expected HTTP {$service['expected_http_code']}, received {$httpCode}";
     } else {
-        // Validate JSON payload for endpoints returning JSON
         $isJson = str_contains(strtolower($contentType), 'application/json')
                   || str_starts_with(trim((string)$response), '{')
                   || str_starts_with(trim((string)$response), '[');
@@ -105,7 +91,6 @@ function checkService(PDO $pdo, array $service): void {
                 $checkFailed = true;
                 $errorMessage = 'Invalid JSON response received';
             } else {
-                // Validate expected payload attributes
                 if (str_contains($service['url'], 'open-meteo.com') && !isset($json['current'])) {
                     $checkFailed = true;
                     $errorMessage = "Weather response missing required 'current' field";
@@ -120,66 +105,30 @@ function checkService(PDO $pdo, array $service): void {
         }
     }
 
-    // Inspect recent history to calculate consecutive failures
-    $stmtRecent = $pdo->prepare("
-        SELECT status, http_code, error_message
-        FROM monitoring_history
-        WHERE service_id = ?
-        ORDER BY checked_at DESC, id DESC
-        LIMIT 5
-    ");
-    $stmtRecent->execute([$service['id']]);
-    $recentChecks = $stmtRecent->fetchAll();
-
-    $prevStatus = !empty($recentChecks) ? $recentChecks[0]['status'] : 'UNKNOWN';
-
-    // Count recent consecutive failures
-    $consecutiveFailures = 0;
-    foreach ($recentChecks as $check) {
-        if ($check['status'] === 'OFFLINE' || (isset($check['error_message']) && str_starts_with($check['error_message'], 'Warning (Attempt'))) {
-            $consecutiveFailures++;
-        } else {
-            break;
-        }
-    }
-
-    // Require 3 consecutive failures before marking service OFFLINE
     if ($checkFailed) {
-        $consecutiveFailures++;
-        if ($consecutiveFailures >= 3) {
-            $historyStatus = 'OFFLINE';
-            $finalError = $errorMessage;
-        } else {
-            // Keep status ONLINE until 3 consecutive fails are reached
-            $historyStatus = ($prevStatus === 'UNKNOWN') ? 'ONLINE' : $prevStatus;
-            $finalError = "Warning (Attempt {$consecutiveFailures}/3): {$errorMessage}";
-        }
+        $status = 'OFFLINE';
     } else {
-        $consecutiveFailures = 0;
-        $historyStatus = ($responseTimeMs > (int)$service['warning_threshold_ms']) ? 'SLOW' : 'ONLINE';
-        $finalError = null;
+        $status = ($responseTimeMs > (int)$service['warning_threshold_ms']) ? 'SLOW' : 'ONLINE';
     }
 
-    // Persist result strictly in monitoring_history
-    $stmtHistory = $pdo->prepare("
+    $stmt = $pdo->prepare("
         INSERT INTO monitoring_history (service_id, checked_at, http_code, response_time_ms, status, error_message)
         VALUES (?, NOW(), ?, ?, ?, ?)
     ");
-    $stmtHistory->execute([
+    $stmt->execute([
         $service['id'],
         $httpCode ?: null,
         $responseTimeMs,
-        $historyStatus,
-        $finalError
+        $status,
+        $checkFailed ? $errorMessage : null
     ]);
 
-    // Display formatted output in CLI
-    $badge = match ($historyStatus) {
+    $badge = match ($status) {
         'ONLINE'  => '[ONLINE]',
         'SLOW'    => '[SLOW]  ',
         'OFFLINE' => '[OFFLINE]',
         default   => '[UNKNOWN]',
     };
     $info = $checkFailed ? "Error: {$errorMessage}" : "{$httpCode} OK ({$responseTimeMs}ms)";
-    echo "  {$badge} {$service['name']} -> {$info} (Consecutive fails: {$consecutiveFailures})\n";
+    echo "  {$badge} {$service['name']} -> {$info}\n";
 }

@@ -50,14 +50,7 @@ $isLoggedIn = !empty($_SESSION['admin_logged_in']);
             </svg>
             <span class="link-label">Live Dashboard</span>
         </a>
-        <a href="/status.php" class="sidebar-link <?php echo $activeItem === 'status' ? 'active' : ''; ?>" title="Public Status">
-            <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-            <span class="link-label">Public Status</span>
-        </a>
+
 
         <div class="nav-section-label">Management</div>
         <a href="/admin.php" class="sidebar-link <?php echo ($activeItem === 'admin' || $activeItem === 'login') ? 'active' : ''; ?>" title="Manage Services">
