@@ -73,15 +73,15 @@ The system includes pre-configured seed data for the 5 required public testing e
 - **PostgreSQL 14+** running locally (default port `5432`).
 
 ### Step 1: Database Initialization
-Create the database and run the schema file:
+Run the database setup script:
 
 ```bash
-# In PostgreSQL CLI / psql:
-createdb -U postgres api_monitor
-psql -U postgres -d api_monitor -f schema.sql
+php seed.php
 ```
 
-*(If your PostgreSQL credentials differ from `postgres` / `root`, update `config/db.php` or set environment variables `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`, `DB_PORT`).*
+*This drops any existing `api_monitor` database, creates it fresh, and executes `schema.sql`.*
+
+*(If your PostgreSQL credentials differ from `postgres` / `root`, set environment variables `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`, `DB_PORT`, or update `config/db.php`).*
 
 ### Step 2: Start the Web Server
 From the project root folder:
