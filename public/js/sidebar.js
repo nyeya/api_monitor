@@ -1,8 +1,3 @@
-/**
- * API Monitor - Sidebar Navigation & Responsive Drawer Interactions
- * Handles desktop collapse/expand toggling with localStorage persistence,
- * and mobile slide-out drawer behavior.
- */
 (function () {
     'use strict';
 
@@ -14,7 +9,6 @@
 
         if (!layout) return;
 
-        // Apply saved collapse preference on desktop screens (> 900px)
         if (window.innerWidth > 900) {
             const isCollapsed = localStorage.getItem('api_monitor_sidebar_collapsed') === 'true';
             if (isCollapsed) {
@@ -22,7 +16,6 @@
             }
         }
 
-        // Toggle collapsed rail mode on desktop
         if (collapseBtn) {
             collapseBtn.addEventListener('click', function () {
                 layout.classList.toggle('sidebar-collapsed');
@@ -31,32 +24,37 @@
             });
         }
 
-        // Mobile drawer toggle
         if (mobileToggleBtn) {
             mobileToggleBtn.addEventListener('click', function () {
                 layout.classList.toggle('sidebar-open');
             });
         }
 
-        // Close mobile drawer on backdrop tap
         if (backdrop) {
             backdrop.addEventListener('click', function () {
                 layout.classList.remove('sidebar-open');
             });
         }
 
-        // Close mobile drawer with Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && layout.classList.contains('sidebar-open')) {
                 layout.classList.remove('sidebar-open');
             }
         });
 
-        // Close mobile drawer when window resized to desktop
         window.addEventListener('resize', function () {
             if (window.innerWidth > 900 && layout.classList.contains('sidebar-open')) {
                 layout.classList.remove('sidebar-open');
             }
+        });
+
+        document.querySelectorAll('.nav-dropdown-toggle').forEach(function (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                const dropdown = toggleBtn.closest('.nav-dropdown');
+                if (!dropdown) return;
+                const isOpen = dropdown.classList.toggle('nav-dropdown-open');
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
         });
     }
 
