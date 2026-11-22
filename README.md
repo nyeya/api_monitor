@@ -9,10 +9,9 @@ Built with **PHP 8**, **PostgreSQL**, **JavaScript (ES6+)**, **HTML5**, **CSS3**
 ## 1. Project Overview & Features
 
 API Monitor simulates an IT operations observability dashboard:
-- **Real-Time Operational Dashboard (`/index.html`)**: Displays live health status for all configured endpoints with color-coded status badges, response times, HTTP status codes, and last-checked timestamps. Automatically refreshes every 30 seconds via asynchronous AJAX polling with a visual countdown timer.
+- **Real-Time Operational Dashboard (`/index.php`)**: Displays live health status for all configured endpoints with color-coded status badges, response times, HTTP status codes, 24-hour and 7-day availability percentages, and last-checked timestamps. Automatically refreshes every 30 seconds via asynchronous AJAX polling with a visual countdown timer.
 - **Service Administration (`/admin.php`)**: Protected administrative interface to register, edit, toggle, or delete monitored services with full CSRF protection, input validation, and SSRF prevention.
 - **Detailed History & Analytics (`/history.php?id=X`)**: Visualizes historical performance with a dynamic **Chart.js** line chart, uptime percentages, average response times, and incident logs.
-- **Public Status Page (`/status.html`)**: Read-only, unprivileged status page showing high-level system operational health for external users and stakeholders without exposing internal URLs or admin controls (**Challenge D**).
 - **Background Monitoring Engine (`cli/check_service.php`)**: CLI script executing cURL requests with timeouts, SSL options, custom User-Agents, JSON structure verification, rate-limit awareness, and cross-platform process concurrency locking (`flock`).
 - **Continuous Worker (`cli/worker.php`)**: Automated background poller for Windows and local environments that continuously checks due services every 10 seconds.
 - **Local Mock API (`/mock_api.php`)**: Predictable test endpoint supporting simulated HTTP status codes (200, 404, 500, 503, 429), configurable delays, and timeouts for live demonstration.
@@ -25,29 +24,21 @@ API Monitor simulates an IT operations observability dashboard:
 | :--- | :--- | :--- |
 | 🟢 | **ONLINE** | Service responded with the expected HTTP status code (typically 200), valid JSON payload, and response time below the warning threshold. |
 | 🟡 | **SLOW** | Service responded correctly with expected HTTP status and valid payload, but response time exceeded `warning_threshold_ms`. |
-| 🔴 | **OFFLINE** | Service failed connection, timed out, returned an unexpected HTTP code, or failed JSON payload validation across 3 consecutive checks (**Challenge A**). |
+| 🔴 | **OFFLINE** | Service failed connection, timed out, returned an unexpected HTTP code, or failed JSON payload validation. |
 | ⚪ | **UNKNOWN / DISABLED** | Service has not yet been inspected or monitoring is currently paused. |
 
 ---
 
-## 3. Advanced Challenges Implemented
-
-### Challenge A – Failure Detection (Hysteresis)
-Avoids false-positive outages caused by transient network glitches. When a check fails, the engine tracks consecutive failures from history. Only when 3 consecutive failed checks occur is the service marked **`OFFLINE`**. Once a successful check is received, status returns to `ONLINE` or `SLOW`.
+## 3. Advanced Features
 
 ### Challenge C – Availability Statistics
-- Calculates uptime availability percentage across three scopes in `history.php`:
-  1. **All-Time Uptime %**: All recorded checks since inception.
-  2. **Last 24 Hours Uptime %**: Rolling 24-hour health window.
-  3. **Last 7 Days Uptime %**: Rolling 7-day health window.
+- Calculates uptime availability percentage across three scopes in `history.php` and on the Live Dashboard (`index.php`):
+  1. **All-Time Uptime %**: All recorded checks since inception (History view).
+  2. **Last 24 Hours Uptime %**: Rolling 24-hour health window (Live Dashboard & History view).
+  3. **Last 7 Days Uptime %**: Rolling 7-day health window (Live Dashboard & History view).
 - **Formula**:
   $$\text{Availability } \% = \left( \frac{\text{Successful Checks (ONLINE or SLOW)}}{\text{Total Checks Recorded}} \right) \times 100$$
 - **Handling Missing Data**: Time intervals with zero scheduled checks are omitted from the denominator (`NULLIF(COUNT(*), 0)`) to prevent division-by-zero errors. Unchecked intervals do not penalize uptime.
-
-### Challenge D – Public Status Page
-- Located at `/status.html` and powered by `/api/public_status.php`.
-- Presents a clean overview ("All Systems Operational", "Degraded Performance", or "Service Outage").
-- Omits administrative actions, internal endpoints, and configuration parameters to ensure complete security.
 
 ---
 
@@ -120,8 +111,7 @@ To run every minute via Linux cron:
 
 ## 7. Web Navigation & Credentials
 
-- **Live Operational Dashboard**: `http://localhost:8000/index.html`
-- **Public Status Page**: `http://localhost:8000/status.html`
+- **Live Operational Dashboard**: `http://localhost:8000/index.php`
 - **Manage Services (Admin)**: `http://localhost:8000/admin.php`
   - **Username**: `admin`
   - **Password**: `admin123`
@@ -163,8 +153,8 @@ During your final evaluation or video conference presentation, demonstrate the r
   - Failure detection hysteresis logic (Challenge A).
   - Background execution script (`check_service.php`) and file-locking mechanism.
 - **Developer 2 (Frontend)**:
-  - Responsive user interface and CSS design (`sstyle.css`).
+  - Responsive user interface and CSS design (`style.css`).
   - Visual status indicators (🟢, 🟡, 🔴, ⚪) and live health summary cards.
   - AJAX dynamic auto-refresh engine (`dashboard.js`) with 30s countdown timer.
   - Chart.js interactive response time chart and statistics grid (`history.php`).
-  - Public status page (`status.html`) and service management forms (`admin.php`).
+  - Real-time availability statistics and service management forms (`admin.php`).
