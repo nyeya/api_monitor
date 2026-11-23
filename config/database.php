@@ -1,14 +1,16 @@
 <?php
-require_once __DIR__ . '/helpers.php';
-
+/**
+ * PostgreSQL PDO database connection.
+ */
 function getDbConnection(): PDO {
     static $pdo = null;
+
     if ($pdo === null) {
-        $host = getenv('DB_HOST') ?: 'localhost';
-        $port = getenv('DB_PORT') ?: '5432';
+        $host   = getenv('DB_HOST') ?: 'localhost';
+        $port   = getenv('DB_PORT') ?: '5432';
         $dbname = getenv('DB_NAME') ?: 'api_monitor';
-        $user = getenv('DB_USER') ?: 'postgres';
-        $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'root';
+        $user   = getenv('DB_USER') ?: 'postgres';
+        $pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'root';
 
         $dsn = "pgsql:host={$host};port={$port};dbname={$dbname};";
         $pdo = new PDO($dsn, $user, $pass, [
@@ -17,5 +19,6 @@ function getDbConnection(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
     }
+
     return $pdo;
 }

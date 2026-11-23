@@ -1,3 +1,7 @@
+-- ==============================================================================
+-- API MONITOR - Initial Seed Data (Required Public APIs & Test Endpoints)
+-- ==============================================================================
+
 INSERT INTO services (name, description, url, http_method, expected_http_code, timeout_seconds, warning_threshold_ms, check_interval_seconds, enabled)
 VALUES
 (
