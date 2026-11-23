@@ -1,20 +1,8 @@
 <?php
-/**
- * API Monitor - Shared Helper Functions & Utilities
- * Centralizes common functions used across web pages and API scripts.
- */
-
-/**
- * Escapes dynamic string output for safe HTML rendering (prevents XSS).
- */
 function escapeHtml($value): string {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-/**
- * Validates a positive integer ID (e.g. from $_GET or $_POST).
- * Returns the integer ID or false if invalid.
- */
 function validateId($value): int|false {
     if (!is_scalar($value)) {
         return false;
@@ -24,27 +12,16 @@ function validateId($value): int|false {
     ]);
 }
 
-/**
- * Retrieves and trims a POST string value safely.
- */
 function postString(string $key): string {
     $value = $_POST[$key] ?? '';
     return is_scalar($value) ? trim((string)$value) : '';
 }
 
-/**
- * Counts UTF-8 string character length safely.
- */
 function stringLength(string $value): int {
     $length = preg_match_all('/./us', $value, $matches);
     return $length === false ? PHP_INT_MAX : $length;
 }
 
-/**
- * Validates URLs and prevents Server-Side Request Forgery (SSRF).
- * Blocks private IP ranges, loopback, and metadata endpoints.
- * Allows local mock_api.php for predictable testing.
- */
 function isSafeUrl(string $url): bool {
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
         return false;
@@ -57,7 +34,6 @@ function isSafeUrl(string $url): bool {
 
     $host = strtolower($parsed['host'] ?? '');
 
-    // Allow local mock testing API specifically
     if ($host === 'localhost' || $host === '127.0.0.1') {
         return str_starts_with($parsed['path'] ?? '', '/mock_api.php');
     }
@@ -70,9 +46,6 @@ function isSafeUrl(string $url): bool {
     ) !== false;
 }
 
-/**
- * Returns the CSS badge class for a given operational status.
- */
 function getStatusBadgeClass(string $status): string {
     return match ($status) {
         'ONLINE'  => 'badge-green',
@@ -82,9 +55,6 @@ function getStatusBadgeClass(string $status): string {
     };
 }
 
-/**
- * Returns the emoji status indicator dot for a given operational status.
- */
 function getStatusDot(string $status): string {
     return match ($status) {
         'ONLINE'  => '🟢',
@@ -92,12 +62,4 @@ function getStatusDot(string $status): string {
         'OFFLINE' => '🔴',
         default   => '⚪',
     };
-}
-
-/**
- * Renders the reusable application sidebar component.
- */
-function renderSidebar(string $active = 'dashboard'): void {
-    $activeSidebar = $active;
-    require __DIR__ . '/../views/sidebar.php';
 }
