@@ -1,8 +1,3 @@
-/**
- * API Monitor - Operational Dashboard Client Script
- * Fetches real-time status data, renders status indicators, and handles 30s auto-refresh.
- */
-
 let refreshCountdown = 30;
 let countdownTimerId = null;
 
@@ -15,7 +10,6 @@ async function refreshDashboard() {
         const services = await response.json();
         renderDashboard(services);
 
-        // Reset countdown
         refreshCountdown = 30;
         updateCountdownLabel();
     } catch (err) {
@@ -48,7 +42,6 @@ function renderDashboard(services) {
 
         const tr = document.createElement('tr');
 
-        // Visual status indicator styling
         let badgeClass;
 
         if (status === 'ONLINE') {
@@ -116,10 +109,8 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-// Initial fetch
 refreshDashboard();
 
-// 1-second countdown ticker
 if (countdownTimerId) clearInterval(countdownTimerId);
 countdownTimerId = setInterval(() => {
     refreshCountdown--;

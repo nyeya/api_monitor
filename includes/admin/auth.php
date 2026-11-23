@@ -1,5 +1,4 @@
 <?php
-// Administrator credentials for section protection
 define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'admin123');
 

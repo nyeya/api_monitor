@@ -100,7 +100,6 @@ $statusBadgeClass = getStatusBadgeClass($currentStatus);
     <div class="app-layout" id="app-layout">
         <?php $activeSidebar = 'dashboard'; require __DIR__ . '/../views/sidebar.php'; ?>
 
-        <!-- Main Content Area -->
         <div class="app-main">
             <main class="container">
         <div class="back-link-wrapper">

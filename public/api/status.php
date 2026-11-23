@@ -5,7 +5,6 @@ require_once __DIR__ . '/../../config/db.php';
 try {
     $pdo = getDbConnection();
 
-    // Query configuration from services, latest operational telemetry, and availability statistics (24h & 7d)
     $sql = "
         SELECT 
             s.id,

@@ -10,7 +10,6 @@
     <div class="app-layout" id="app-layout">
         <?php $activeSidebar = 'admin'; require __DIR__ . '/../sidebar.php'; ?>
 
-        <!-- Main Content Area -->
         <div class="app-main">
             <main class="container login-container">
                 <section class="card">

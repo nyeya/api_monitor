@@ -15,10 +15,8 @@ require_once __DIR__ . '/../config/db.php';
     <div class="app-layout" id="app-layout">
         <?php $activeSidebar = 'dashboard'; require __DIR__ . '/../views/sidebar.php'; ?>
 
-        <!-- Main Content Area -->
         <div class="app-main">
             <main class="container">
-                <!-- Quick Health Summary -->
                 <div class="summary-cards">
                     <div class="summary-card">
                         <span class="summary-icon">📡</span>
