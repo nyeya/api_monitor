@@ -11,6 +11,7 @@ $formValues = [
     'check_interval_seconds'  => '60',
     'enabled'                 => true,
 ];
+$editingService = false;
 $pageError      = null;
 $formAction     = '/add-service.php';
 
