@@ -15,17 +15,13 @@ $editingService = false;
 $pageError      = null;
 $formAction     = '/add-service.php';
 
-$messages   = ['added' => 'Service added successfully.'];
-$messageKey = $_GET['message'] ?? '';
-$message    = is_string($messageKey) ? ($messages[$messageKey] ?? '') : '';
+$message = ($_GET['message'] ?? null) === 'added' ? 'Service added successfully.' : '';
 
 try {
-    $pdo           = getDbConnection();
-    $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $pdo = getDbConnection();
 
-    if ($requestMethod === 'POST') {
-        $submittedToken = postString('csrf_token');
-        if (!hash_equals($csrfToken, $submittedToken)) {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+        if (!hash_equals($csrfToken, postString('csrf_token'))) {
             http_response_code(403);
             $pageError = 'The security token has expired or is invalid. Please try again.';
         } elseif (postString('action') !== 'add') {
@@ -50,6 +46,7 @@ try {
             if (stringLength($formValues['description']) > 2000) {
                 $errors[] = 'Description must be 2000 characters or fewer.';
             }
+            print($formValues['url']);
             if (!isSafeUrl($formValues['url'])) {
                 $errors[] = 'Enter a valid public HTTP or HTTPS URL (Private networks and internal addresses are blocked).';
             }
@@ -57,14 +54,13 @@ try {
                 $errors[] = 'Choose GET or HEAD as the HTTP method.';
             }
 
-            $numberFields = [
+            $numbers = [];
+            foreach ([
                 'expected_http_code'     => [100, 599],
                 'timeout_seconds'        => [1, 120],
                 'warning_threshold_ms'   => [1, 120000],
                 'check_interval_seconds' => [5, 86400],
-            ];
-            $numbers = [];
-            foreach ($numberFields as $field => $range) {
+            ] as $field => $range) {
                 $number = filter_var($formValues[$field], FILTER_VALIDATE_INT);
                 if ($number === false || $number < $range[0] || $number > $range[1]) {
                     $errors[] = 'Please check the values entered for numeric settings.';
@@ -75,7 +71,7 @@ try {
 
             if ($errors) {
                 http_response_code(400);
-                $pageError = implode(' ', array_unique($errors));
+                $pageError = implode(' ', $errors);
             } else {
                 $stmt = $pdo->prepare("
                     INSERT INTO services (

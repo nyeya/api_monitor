@@ -18,10 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['admin_action'] ?? '') === 
         $_SESSION['admin_logged_in'] = true;
         header('Location: /admin.php', true, 303);
         exit;
-    } else {
-        http_response_code(401);
-        $loginError = 'Invalid administrator username or password.';
     }
+
+    http_response_code(401);
+    $loginError = 'Invalid administrator username or password.';
 }
 
 if (empty($_SESSION['admin_logged_in'])) {

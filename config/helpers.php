@@ -37,7 +37,7 @@ function isSafeUrl(string $url): bool {
     if ($host === 'localhost' || $host === '127.0.0.1') {
         return str_starts_with($parsed['path'] ?? '', '/mock_api.php');
     }
-
+    // return true;
     $ip = gethostbyname($host);
     return filter_var(
         $ip,

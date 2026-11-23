@@ -1,7 +1,7 @@
 <section class="card">
     <h2><?php echo $editingService ? 'Edit Monitored Service' : 'Add New Service'; ?></h2>
     <p class="text-muted">Configure endpoint parameters, expectations, and monitoring intervals.</p>
-    <form method="post" action="<?php echo escapeHtml($formAction ?? '/admin.php'); ?>">
+    <form method="post" action="<?php echo escapeHtml($formAction); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo escapeHtml($csrfToken); ?>">
         <input type="hidden" name="action" value="<?php echo $editingService ? 'save' : 'add'; ?>">
         <input type="hidden" name="id" value="<?php echo escapeHtml($formValues['id']); ?>">
@@ -55,11 +55,6 @@
 
         <div class="form-actions">
             <button class="btn btn-primary" type="submit"><?php echo $editingService ? 'Update Service' : 'Add Service'; ?></button>
-            <?php if ($editingService): ?>
-                <a class="btn btn-secondary" href="/admin.php">Cancel Edit</a>
-            <?php else: ?>
-                <a class="btn btn-secondary" href="/admin.php">View All Services</a>
-            <?php endif; ?>
         </div>
     </form>
 </section>
