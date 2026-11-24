@@ -12,7 +12,7 @@
 
         <div class="app-main">
             <main class="container">
-                <?php if ($pageError !== null): ?>
+                <?php if ($pageError !== null && !$editingService && $confirmDelete === null): ?>
                     <section class="card">
                         <p class="notice" role="alert"><?php echo escapeHtml($pageError); ?></p>
                     </section>
@@ -23,16 +23,26 @@
                     </p>
                 <?php endif; ?>
 
-                <?php if ($confirmDelete !== null): ?>
-                    <?php require __DIR__ . '/confirm_delete.php'; ?>
-                <?php elseif ($editingService): ?>
-                    <?php require __DIR__ . '/service_form.php'; ?>
-                <?php endif; ?>
-
                 <?php require __DIR__ . '/service_table.php'; ?>
             </main>
         </div>
     </div>
+
+    <?php if ($confirmDelete !== null || $editingService): ?>
+        <div class="modal-backdrop" id="admin-modal-backdrop" data-close-url="/admin.php" role="dialog" aria-modal="true">
+            <div class="modal-dialog <?php echo $confirmDelete !== null ? 'modal-dialog-sm' : ''; ?>">
+                <a href="/admin.php" class="modal-close-btn" title="Close" aria-label="Close">&times;</a>
+
+                <?php if ($confirmDelete !== null): ?>
+                    <?php require __DIR__ . '/confirm_delete.php'; ?>
+                <?php else: ?>
+                    <?php require __DIR__ . '/service_form.php'; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        <script src="/js/modal.js"></script>
+    <?php endif; ?>
+
     <script src="/js/sidebar.js"></script>
 </body>
 </html>

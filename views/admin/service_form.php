@@ -1,6 +1,9 @@
 <section class="card">
     <h2><?php echo $editingService ? 'Edit Monitored Service' : 'Add New Service'; ?></h2>
     <p class="text-muted">Configure endpoint parameters, expectations, and monitoring intervals.</p>
+    <?php if ($editingService && !empty($pageError)): ?>
+        <p class="notice" role="alert"><?php echo escapeHtml($pageError); ?></p>
+    <?php endif; ?>
     <form method="post" action="<?php echo escapeHtml($formAction); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo escapeHtml($csrfToken); ?>">
         <input type="hidden" name="action" value="<?php echo $editingService ? 'save' : 'add'; ?>">
