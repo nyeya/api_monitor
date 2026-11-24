@@ -30,6 +30,10 @@ function isSafeUrl(string $url): bool {
         return false;
     }
 
+    if (isset($parsed['user']) || isset($parsed['pass'])) {
+        return false;
+    }
+
     $host = strtolower($parsed['host'] ?? '');
     if ($host === '') {
         return false;
@@ -79,18 +83,18 @@ function validateServiceInput(array $input): array {
     }
 
     $ranges = [
-        'expected_http_code'     => [100, 599],
-        'timeout_seconds'        => [1, 120],
-        'warning_threshold_ms'   => [1, 120000],
-        'check_interval_seconds' => [5, 86400],
+        'expected_http_code'     => [100, 599, 'Expected HTTP code must be between 100 and 599.'],
+        'timeout_seconds'        => [1, 120, 'Timeout must be between 1 and 120 seconds.'],
+        'warning_threshold_ms'   => [1, 120000, 'Warning threshold must be between 1 and 120000 ms.'],
+        'check_interval_seconds' => [5, 86400, 'Check interval must be between 5 and 86400 seconds.'],
     ];
 
     $numbers = [];
-    foreach ($ranges as $field => [$min, $max]) {
+    foreach ($ranges as $field => [$min, $max, $errorMsg]) {
         $value = filter_var($input[$field], FILTER_VALIDATE_INT);
         if ($value === false || $value < $min || $value > $max) {
-            $errors[] = 'Please check the numeric values entered for HTTP code, timeout, threshold, and interval.';
-            break;
+            $errors[] = $errorMsg;
+            continue;
         }
         $numbers[$field] = $value;
     }

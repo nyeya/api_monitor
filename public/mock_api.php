@@ -12,14 +12,15 @@
  *   /mock_api.php?timeout=1     -> Sleeps 10s (triggers timeout)
  */
 
-$status  = isset($_GET['status']) ? (int)$_GET['status'] : 200;
-$delay   = isset($_GET['delay']) ? (int)$_GET['delay'] : 0;
-$timeout = !empty($_GET['timeout']);
+$rawStatus = isset($_GET['status']) ? (int)$_GET['status'] : 200;
+$status    = ($rawStatus >= 100 && $rawStatus <= 599) ? $rawStatus : 200;
+$delay     = isset($_GET['delay']) ? max(0, min((int)$_GET['delay'], 30)) : 0;
+$timeout   = !empty($_GET['timeout']);
 
 if ($timeout) {
     sleep(10);
 } elseif ($delay > 0) {
-    sleep(min($delay, 30));
+    sleep($delay);
 }
 
 http_response_code($status);
