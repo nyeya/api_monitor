@@ -13,7 +13,7 @@
             </div>
             <div class="form-group">
                 <label for="url">Endpoint URL *</label>
-                <input id="url" name="url" type="url" value="<?php echo escapeHtml($formValues['url']); ?>" placeholder="https://api.example.com/health" required>
+                <input id="url" name="url" type="url" value="<?php echo escapeHtml($formValues['url']); ?>" placeholder="https://jsonplaceholder.typicode.com/posts/1" required>
             </div>
         </div>
 
@@ -55,6 +55,9 @@
 
         <div class="form-actions">
             <button class="btn btn-primary" type="submit"><?php echo $editingService ? 'Update Service' : 'Add Service'; ?></button>
+            <?php if ($editingService): ?>
+                <a class="btn btn-secondary" href="/admin.php">Cancel</a>
+            <?php endif; ?>
         </div>
     </form>
 </section>

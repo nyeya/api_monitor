@@ -4,7 +4,7 @@
             <h2>Configured Monitoring Services</h2>
         </div>
         <div class="card-header-actions">
-            <a href="/add-service.php" class="btn btn-primary btn-sm">+ Add Service</a>
+            <a href="/add_service.php" class="btn btn-primary btn-sm">+ Add Service</a>
         </div>
     </div>
     <div class="table-wrap">
