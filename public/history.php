@@ -7,6 +7,10 @@ require_once __DIR__ . '/../src/service_repository.php';
 requireAdminLogin();
 
 $serviceId = validateId($_GET['id'] ?? null);
+$allowedLimits = [25, 50, 100];
+$requestedLimit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
+$historyLimit = in_array($requestedLimit, $allowedLimits, true) ? $requestedLimit : 50;
+
 $service = null;
 $stats = [];
 $history = [];
@@ -25,7 +29,7 @@ if ($serviceId === false) {
             $pageError = 'Service not found.';
         } else {
             $stats = getServiceStats($pdo, $serviceId);
-            $history = getRecentServiceHistory($pdo, $serviceId, 50);
+            $history = getRecentServiceHistory($pdo, $serviceId, $historyLimit);
         }
     } catch (PDOException $e) {
         error_log('Could not load service history: ' . $e->getMessage());
@@ -36,10 +40,15 @@ if ($serviceId === false) {
 
 $responsePoints = array_values(array_filter($history, fn($p) => $p['response_time_ms'] !== null));
 $chartValues = array_map(fn($p) => (float)$p['response_time_ms'], $responsePoints);
-$chartLabels = array_map(fn($p) => date('Y-m-d H:i:s', strtotime($p['checked_at'])), $responsePoints);
+$chartLabels = array_map(fn($p) => date('M j, H:i:s', strtotime($p['checked_at'])), $responsePoints);
 
-$currentStatus = $history ? $history[count($history) - 1]['status'] : 'UNKNOWN';
+if ($service && !filter_var($service['enabled'], FILTER_VALIDATE_BOOLEAN)) {
+    $currentStatus = 'DISABLED';
+} else {
+    $currentStatus = $history ? $history[count($history) - 1]['status'] : 'UNKNOWN';
+}
 $statusDot = getStatusDot($currentStatus);
 $statusBadgeClass = getStatusBadgeClass($currentStatus);
+$statusLabel = getStatusLabel($currentStatus);
 
 require __DIR__ . '/../views/history.php';
