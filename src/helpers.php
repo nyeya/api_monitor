@@ -59,18 +59,39 @@ function getStatusBadgeClass(string $status): string {
     return match ($status) {
         'ONLINE'       => 'badge-green',
         'SLOW'         => 'badge-yellow',
-        'RATE_LIMITED' => 'badge-yellow',
+        'RATE_LIMITED' => 'badge-orange',
         'OFFLINE'      => 'badge-red',
         default        => 'badge-grey',
     };
 }
 
-function getStatusDot(string $status): string {
+function getStatusDotClass(string $status): string {
     return match ($status) {
-        'ONLINE'       => '🟢',
-        'SLOW'         => '🟡',
-        'RATE_LIMITED' => '🟠',
-        'OFFLINE'      => '🔴',
-        default        => '⚪',
+        'ONLINE'       => 'dot-green',
+        'SLOW'         => 'dot-yellow',
+        'RATE_LIMITED' => 'dot-orange',
+        'OFFLINE'      => 'dot-red',
+        default        => 'dot-grey',
     };
+}
+
+function getStatusLabel(string $status): string {
+    return match ($status) {
+        'RATE_LIMITED' => 'Rate Limited',
+        default        => $status,
+    };
+}
+
+function getStatusDot(string $status): string {
+    return '<span class="status-dot ' . getStatusDotClass($status) . '" aria-hidden="true"></span>';
+}
+
+function formatDurationSeconds(int $seconds): string {
+    if ($seconds >= 3600 && $seconds % 3600 === 0) {
+        return ($seconds / 3600) . 'h';
+    }
+    if ($seconds >= 60 && $seconds % 60 === 0) {
+        return ($seconds / 60) . 'm';
+    }
+    return $seconds . 's';
 }
