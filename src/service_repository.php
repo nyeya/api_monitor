@@ -98,7 +98,7 @@ function saveCheckResult(
     PDO $pdo,
     int $serviceId,
     ?int $httpCode,
-    int $responseTimeMs,
+    int|float $responseTimeMs,
     string $status,
     ?string $errorMessage
 ): void {
@@ -180,7 +180,10 @@ function getServicesStatus(PDO $pdo, bool $publicOnly = false): array {
 function getServiceStats(PDO $pdo, int $serviceId): array {
     $stmt = $pdo->prepare("
         SELECT
+            COUNT(*) AS total_checks,
             ROUND(AVG(CASE WHEN status != 'OFFLINE' THEN response_time_ms END), 2) AS avg_response_time_ms,
+            ROUND(MIN(CASE WHEN status != 'OFFLINE' THEN response_time_ms END), 2) AS min_response_time_ms,
+            ROUND(MAX(CASE WHEN status != 'OFFLINE' THEN response_time_ms END), 2) AS max_response_time_ms,
             ROUND(
                 COUNT(CASE WHEN status != 'OFFLINE' THEN 1 END)::DECIMAL
                 / NULLIF(COUNT(*), 0) * 100,

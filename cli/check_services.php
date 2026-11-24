@@ -101,12 +101,11 @@ function performHttpCheck(array $service): array {
 
     $startTime = microtime(true);
     $body = curl_exec($ch);
-    $responseTimeMs = (int)round((microtime(true) - $startTime) * 1000);
+    $responseTimeMs = round((microtime(true) - $startTime) * 1000, 2);
 
     $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $contentType = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     $curlError = curl_error($ch);
-    curl_close($ch);
 
     return [
         'body'             => $body,
@@ -155,8 +154,10 @@ function evaluateResponse(array $service, array $result): array {
         }
     }
 
-    if ($result['response_time_ms'] > (int)$service['warning_threshold_ms']) {
-        return ['SLOW', null];
+    $thresholdMs = (int)$service['warning_threshold_ms'];
+    if ($result['response_time_ms'] > $thresholdMs) {
+        $roundedMs = (int)round($result['response_time_ms']);
+        return ['SLOW', "Slow response: {$roundedMs}ms exceeded {$thresholdMs}ms threshold"];
     }
 
     return ['ONLINE', null];
