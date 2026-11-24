@@ -5,6 +5,17 @@
 
 function ensureSessionStarted(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        if (!headers_sent()) {
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (($_SERVER['SERVER_PORT'] ?? null) == 443);
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path'     => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+                'secure'   => $isHttps,
+            ]);
+        }
         session_start();
     }
 }
@@ -12,6 +23,28 @@ function ensureSessionStarted(): void {
 function isAdminLoggedIn(): bool {
     ensureSessionStarted();
     return !empty($_SESSION['admin_logged_in']);
+}
+
+function getAdminUsername(): string {
+    ensureSessionStarted();
+    return (string)($_SESSION['admin_username'] ?? (getenv('ADMIN_USER') ?: 'admin'));
+}
+
+function destroyAdminSession(): void {
+    $_SESSION = [];
+    if (ini_get('session.use_cookies') && !headers_sent()) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            $params['httponly']
+        );
+    }
+    session_destroy();
 }
 
 function getCsrfToken(): string {
@@ -36,21 +69,27 @@ function requireAdminLogin(): void {
     $adminUser = getenv('ADMIN_USER') ?: 'admin';
     $adminPass = getenv('ADMIN_PASS') !== false ? getenv('ADMIN_PASS') : 'admin123';
 
-    if (isset($_GET['logout'])) {
-        $_SESSION = [];
-        session_destroy();
+    $isPostLogout = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
+        && ($_POST['admin_action'] ?? '') === 'logout'
+        && verifyCsrfToken((string)($_POST['csrf_token'] ?? ''));
+
+    if ($isPostLogout || isset($_GET['logout'])) {
+        destroyAdminSession();
         header('Location: /admin.php', true, 303);
         exit;
     }
 
     $loginError = null;
+    $submittedUsername = '';
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['admin_action'] ?? '') === 'login') {
         $submittedUser = trim((string)($_POST['username'] ?? ''));
-        $submittedPass = trim((string)($_POST['password'] ?? ''));
+        $submittedPass = (string)($_POST['password'] ?? '');
+        $submittedUsername = $submittedUser;
 
         if (hash_equals($adminUser, $submittedUser) && hash_equals($adminPass, $submittedPass)) {
             session_regenerate_id(true);
             $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_username'] = $adminUser;
 
             $redirectTo = $_SESSION['redirect_after_login'] ?? '/index.php';
             unset($_SESSION['redirect_after_login']);
