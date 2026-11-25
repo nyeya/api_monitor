@@ -11,16 +11,25 @@
         <?php $activeSidebar = 'add_service'; require __DIR__ . '/../partials/sidebar.php'; ?>
 
         <div class="app-main">
-            <main class="container">
+            <main class="container form-page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Add New Service</h1>
+                        <p class="text-muted page-subtitle">Register a new API or web endpoint for automated health checks</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <a href="/admin.php" class="btn btn-sm btn-secondary">&larr; Services List</a>
+                    </div>
+                </div>
+
                 <?php if ($pageError !== null): ?>
-                    <section class="card">
-                        <p class="notice" role="alert"><?php echo escapeHtml($pageError); ?></p>
-                    </section>
+                    <div class="alert-banner alert-error" role="alert"><?php echo escapeHtml($pageError); ?></div>
                 <?php endif; ?>
                 <?php if ($message !== ''): ?>
-                    <p class="badge badge-green alert-banner" role="status">
-                        ✓ <?php echo escapeHtml($message); ?>
-                    </p>
+                    <div class="alert-banner alert-success" role="status">
+                        <span aria-hidden="true">&#10003;</span> <?php echo escapeHtml($message); ?>
+                        <a href="/admin.php" class="alert-link">View all services &rarr;</a>
+                    </div>
                 <?php endif; ?>
 
                 <?php require __DIR__ . '/service_form.php'; ?>

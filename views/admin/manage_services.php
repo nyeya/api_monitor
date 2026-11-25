@@ -12,15 +12,23 @@
 
         <div class="app-main">
             <main class="container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Manage Services</h1>
+                        <p class="text-muted page-subtitle">Configure monitored endpoints, thresholds, and check intervals</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <a href="/add_service.php" class="btn btn-primary btn-sm">+ Add Service</a>
+                    </div>
+                </div>
+
                 <?php if ($pageError !== null && !$editingService && $confirmDelete === null): ?>
-                    <section class="card">
-                        <p class="notice" role="alert"><?php echo escapeHtml($pageError); ?></p>
-                    </section>
+                    <div class="alert-banner alert-error" role="alert"><?php echo escapeHtml($pageError); ?></div>
                 <?php endif; ?>
                 <?php if ($message !== ''): ?>
-                    <p class="badge badge-green alert-banner" role="status">
-                        ✓ <?php echo escapeHtml($message); ?>
-                    </p>
+                    <div class="alert-banner alert-success" role="status">
+                        <span aria-hidden="true">&#10003;</span> <?php echo escapeHtml($message); ?>
+                    </div>
                 <?php endif; ?>
 
                 <?php require __DIR__ . '/service_table.php'; ?>

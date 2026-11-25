@@ -1,22 +1,14 @@
 <section class="card">
-    <div class="card-header-row">
-        <div>
-            <h2>Configured Monitoring Services</h2>
-        </div>
-        <div class="card-header-actions">
-            <a href="/add_service.php" class="btn btn-primary btn-sm">+ Add Service</a>
-        </div>
-    </div>
     <div class="table-wrap">
         <table class="data-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Service</th>
                     <th>Endpoint URL</th>
                     <th>Method</th>
                     <th>Exp. Code</th>
-                    <th>Timeout</th>
+                    <th>Limits</th>
                     <th>Interval</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -24,20 +16,33 @@
             </thead>
             <tbody>
                 <?php if (!$services): ?>
-                    <tr><td colspan="9" class="table-empty-cell">No services configured yet.</td></tr>
+                    <tr>
+                        <td colspan="9" class="table-empty-cell">No services configured yet. <a href="/add_service.php">Add your first service</a>.</td>
+                    </tr>
                 <?php else: ?>
                     <?php foreach ($services as $svc): ?>
                         <?php $enabled = filter_var($svc['enabled'], FILTER_VALIDATE_BOOLEAN); ?>
                         <tr>
-                            <td><?php echo escapeHtml($svc['id']); ?></td>
-                            <td><strong><?php echo escapeHtml($svc['name']); ?></strong></td>
-                            <td><code class="table-endpoint-code"><?php echo escapeHtml($svc['url']); ?></code></td>
-                            <td><?php echo escapeHtml($svc['http_method']); ?></td>
-                            <td><?php echo escapeHtml($svc['expected_http_code']); ?></td>
-                            <td><?php echo escapeHtml($svc['timeout_seconds']); ?>s</td>
-                            <td><?php echo escapeHtml($svc['check_interval_seconds']); ?>s</td>
+                            <td class="text-muted">#<?php echo escapeHtml($svc['id']); ?></td>
+                            <td>
+                                <strong><?php echo escapeHtml($svc['name']); ?></strong>
+                                <?php if (!empty($svc['description'])): ?>
+                                    <div class="service-desc-subtext"><?php echo escapeHtml($svc['description']); ?></div>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <code class="table-endpoint-code" title="<?php echo escapeHtml($svc['url']); ?>"><?php echo escapeHtml($svc['url']); ?></code>
+                            </td>
+                            <td><code><?php echo escapeHtml($svc['http_method']); ?></code></td>
+                            <td><code><?php echo escapeHtml($svc['expected_http_code']); ?></code></td>
+                            <td class="nowrap">
+                                <span><?php echo escapeHtml($svc['timeout_seconds']); ?>s</span>
+                                <span class="text-muted">/ <?php echo escapeHtml($svc['warning_threshold_ms']); ?>ms</span>
+                            </td>
+                            <td class="nowrap"><?php echo escapeHtml(formatDurationSeconds((int)$svc['check_interval_seconds'])); ?></td>
                             <td>
                                 <span class="badge <?php echo $enabled ? 'badge-green' : 'badge-grey'; ?>">
+                                    <span class="status-dot <?php echo $enabled ? 'dot-green' : 'dot-grey'; ?>" aria-hidden="true"></span>
                                     <?php echo $enabled ? 'Active' : 'Disabled'; ?>
                                 </span>
                             </td>
